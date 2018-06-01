@@ -1,0 +1,5 @@
+---
+- url: github.com/simeji/jid/cmd/jid
+- url: golang.org/x/lint/golint
+- url: golang.org/x/tools/cmd/goimports
+- url: github.com/arsham/figurine

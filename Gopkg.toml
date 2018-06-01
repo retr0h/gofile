@@ -1,0 +1,17 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+
+[[constraint]]
+  name = "github.com/xeipuuv/gojsonschema"
+
+[[constraint]]
+  name = "github.com/Sirupsen/logrus"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
