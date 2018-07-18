@@ -18,52 +18,33 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-package cmd
+package utils
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/logrusorgru/aurora"
 )
 
 var (
-	version   string
-	buildHash string
-	buildDate string
-	debug     bool
+	// OsExit should be private?!
+	OsExit = os.Exit
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "gofile",
-	Short: "A utility to install go packages from a gofile",
-	Long: `
-                   ___   __   __
-.-----. .-----. .'  _| |__| |  | .-----.
-|  _  | |  _  | |   _| |  | |  | |  -__|
-|___  | |_____| |__|   |__| |__| |_____|
-|_____|
-
-A simple utility to install go packages from a gofile (gofile.yml).
-
-https://github.com/retr0h/gofile
-`,
+// PrintError formats and prints the provided string for error messages.
+func PrintError(msg string) {
+	fmt.Fprintf(os.Stderr, "%s: %s\n", aurora.Red("ERROR"), msg)
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute(v string, bh string, bd string) {
-	version = v
-	buildHash = bh
-	buildDate = bd
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+// PrintErrorAndExit prints the error message and os.Exits with the optionally
+// provided error code.
+func PrintErrorAndExit(msg string, exitCodeOptional ...int) {
+	exitCode := 1
+	if len(exitCodeOptional) > 0 {
+		exitCode = exitCodeOptional[0]
 	}
-}
 
-func init() {
-	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable or disable debug mode")
+	PrintError(msg)
+	OsExit(exitCode)
 }

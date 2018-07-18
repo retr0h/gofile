@@ -21,10 +21,11 @@
 package pkg_test
 
 import (
-	"fmt"
+	"errors"
 	"path"
 	"testing"
 
+	capturer "github.com/kami-zh/go-capturer"
 	"github.com/retr0h/gofile/pkg"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +37,6 @@ func TestUnmarshalYAMLDoesNotParseYAMLAndReturnsError(t *testing.T) {
 ---
 %foo:
 `
-
 	err := p.UnmarshalYAML([]byte(data))
 	msg := "yaml: line 3: found unexpected non-alphabetical character"
 	assert.Equal(t, err.Error(), msg)
@@ -48,15 +48,9 @@ func TestUnmarshalYAMLDoesNotValidateYAMLAndReturnsError(t *testing.T) {
 ---
 foo: bar
 `
-
-	logOutput := pkg.CaptureLogOutput(func() {
-		err := p.UnmarshalYAML([]byte(data))
-		assert.Error(t, err)
-	})
-
-	fmt.Println(logOutput)
-	// msg := "The document is not valid - (root): Invalid type. Expected: array, given: object."
-	// assert.Contains(t, logOutput, msg)
+	err := p.UnmarshalYAML([]byte(data))
+	expectedError := errors.New("(root): Invalid type. Expected: array, given: object")
+	assert.Equal(t, expectedError, err)
 }
 
 func TestUnmarshalYAML(t *testing.T) {
@@ -84,4 +78,44 @@ func TestUnmarshalYAMLFile(t *testing.T) {
 
 	p.UnmarshalYAMLFile(filename)
 	assert.NotNil(t, p.Packages[0].URL)
+}
+
+func TestRunCommand(t *testing.T) {
+	out := capturer.CaptureStdout(func() {
+		err := p.RunCmd("ls")
+		assert.NoError(t, err)
+	})
+
+	assert.Empty(t, out)
+}
+
+func TestRunCommandPrintsStreamingStdout(t *testing.T) {
+	p := pkg.Packages{
+		Debug: true,
+	}
+
+	out := capturer.CaptureStdout(func() {
+		err := p.RunCmd("echo", "-n", "foo")
+		assert.NoError(t, err)
+	})
+
+	assert.Equal(t, "COMMAND: \x1b[30;41mecho -n foo\x1b[0m\nfoo", out)
+}
+
+func TestRunCommandPrintsStreamingStderr(t *testing.T) {
+	p := pkg.Packages{
+		Debug: true,
+	}
+
+	out := capturer.CaptureStderr(func() {
+		err := p.RunCmd("cat", "foo")
+		assert.Error(t, err)
+	})
+
+	assert.Equal(t, "cat: foo: No such file or directory\n", out)
+}
+
+func TestRunCommandReturnsError(t *testing.T) {
+	err := p.RunCmd("false")
+	assert.Error(t, err)
 }

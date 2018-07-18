@@ -22,15 +22,14 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"strconv"
 
 	"github.com/retr0h/gofile/pkg"
+	"github.com/retr0h/gofile/utils"
 	"github.com/spf13/cobra"
 )
 
 var (
-	p pkg.Packages
+	fileName string
 )
 
 // installCmd represents the install command
@@ -38,13 +37,18 @@ var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install gofile packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("Debug: %s\n", strconv.FormatBool(debug))
-		if err := p.UnmarshalYAMLFile(filename); err != nil {
-			panic(err)
+		p := pkg.Packages{
+			Debug: debug,
+		}
+
+		if err := p.UnmarshalYAMLFile(fileName); err != nil {
+			msg := fmt.Sprintf("An error occurred unmarshalling '%s'.\n%s\n", fileName, err)
+			utils.PrintErrorAndExit(msg)
 		}
 
 		if err := p.Install(); err != nil {
-			os.Exit(1)
+			msg := fmt.Sprintf("An error occurred installing packages.\n%s\n", err)
+			utils.PrintErrorAndExit(msg)
 		}
 
 		return nil
@@ -52,5 +56,6 @@ var installCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(installCmd)
+	installCmd.PersistentFlags().StringVarP(&fileName, "filename", "f", "gofile.yml", "Path to gofile")
+	rootCmd.AddCommand(installCmd)
 }

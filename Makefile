@@ -48,9 +48,9 @@ build: clean
 	@echo "+ $@"
 	docker run --rm -it \
 		-v $(CURDIR):/gopath/src/github.com/retr0h/gofile \
-		tcnksm/gox:1.9 \
-		bash -c cd /gopath/src/github.com/retr0h/gofile && \
-			gox \
-				-ldflags="$(LDFLAGS)" \
-				-osarch="linux/amd64 darwin/amd64" \
-				-output="$(BUILDDIR)/{{.Dir}}_{{.OS}}_{{.Arch}}"
+		-w /gopath/src/github.com/retr0h/gofile \
+		tcnksm/gox:1.10.3 \
+		gox \
+			-ldflags="$(LDFLAGS)" \
+			-osarch="linux/amd64 darwin/amd64" \
+			-output="$(BUILDDIR)/{{.Dir}}_{{.OS}}_{{.Arch}}"

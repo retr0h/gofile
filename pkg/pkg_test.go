@@ -21,41 +21,24 @@
 package pkg
 
 import (
-	"bytes"
-	"os"
+	"errors"
 	"testing"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
 var p Packages
 
-func CaptureLogOutput(fn func()) string {
-	var buffer bytes.Buffer
-
-	log.SetOutput(&buffer)
-	fn()
-	log.SetOutput(os.Stderr)
-
-	return buffer.String()
-}
-
 func TestValidateWithoutRootArrayReturnsErrorAndLogsValidationError(t *testing.T) {
 	var data = `
 ---
 foo:
 `
-
-	logOutput := CaptureLogOutput(func() {
-		jsonData, _ := yaml.YAMLToJSON([]byte(data))
-		err := p.validate([]byte(jsonData))
-		assert.Error(t, err)
-	})
-
-	msg := "The document is not valid - (root): Invalid type. Expected: array, given: object."
-	assert.Contains(t, logOutput, msg)
+	jsonData, _ := yaml.YAMLToJSON([]byte(data))
+	err := p.validate([]byte(jsonData))
+	expectedError := errors.New("(root): Invalid type. Expected: array, given: object")
+	assert.Equal(t, expectedError, err)
 }
 
 func TestValidateWithoutStringReturnsErrorAndLogsValidationError(t *testing.T) {
@@ -63,31 +46,23 @@ func TestValidateWithoutStringReturnsErrorAndLogsValidationError(t *testing.T) {
 ---
 - url:
 `
+	jsonData, _ := yaml.YAMLToJSON([]byte(data))
+	err := p.validate([]byte(jsonData))
+	assert.Error(t, err)
 
-	logOutput := CaptureLogOutput(func() {
-		jsonData, _ := yaml.YAMLToJSON([]byte(data))
-		err := p.validate([]byte(jsonData))
-		assert.Error(t, err)
-	})
-
-	msgs := []string{
-		"The document is not valid - 0.url: Invalid type. Expected: string, given: null.",
+	messages := []string{
+		"0.url: Invalid type. Expected: string, given: null",
 	}
-
-	for _, msg := range msgs {
-		assert.Contains(t, logOutput, msg)
+	for _, msg := range messages {
+		assert.Contains(t, err.Error(), msg)
 	}
 }
-
-// Test minitems
-// Test uniqueItems
 
 func TestValidate(t *testing.T) {
 	var data = `
 ---
 - url: https://example.com/user/repo.git
 `
-
 	jsonData, _ := yaml.YAMLToJSON([]byte(data))
 	err := p.validate([]byte(jsonData))
 	assert.NoError(t, err)

@@ -18,52 +18,42 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-package cmd
+package utils_test
 
 import (
-	"fmt"
-	"os"
+	"testing"
 
-	"github.com/spf13/cobra"
+	capturer "github.com/kami-zh/go-capturer"
+	"github.com/retr0h/gofile/utils"
+	"github.com/stretchr/testify/assert"
 )
 
-var (
-	version   string
-	buildHash string
-	buildDate string
-	debug     bool
-)
+func TestPrintError(t *testing.T) {
+	out := capturer.CaptureStderr(func() {
+		utils.PrintError("foo")
+	})
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "gofile",
-	Short: "A utility to install go packages from a gofile",
-	Long: `
-                   ___   __   __
-.-----. .-----. .'  _| |__| |  | .-----.
-|  _  | |  _  | |   _| |  | |  | |  -__|
-|___  | |_____| |__|   |__| |__| |_____|
-|_____|
-
-A simple utility to install go packages from a gofile (gofile.yml).
-
-https://github.com/retr0h/gofile
-`,
+	assert.Equal(t, "\x1b[31mERROR\x1b[0m: foo\n", out)
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute(v string, bh string, bd string) {
-	version = v
-	buildHash = bh
-	buildDate = bd
+func TestPrintErrorAndExit(t *testing.T) {
+	oldOsExit := utils.OsExit
+	defer func() { utils.OsExit = oldOsExit }()
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	var got int
+	myExit := func(code int) {
+		got = code
 	}
-}
 
-func init() {
-	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable or disable debug mode")
+	utils.OsExit = myExit
+
+	out := capturer.CaptureStderr(func() {
+		utils.PrintErrorAndExit("foo")
+	})
+
+	assert.Equal(t, "\x1b[31mERROR\x1b[0m: foo\n", out)
+	assert.Equal(t, 1, got)
+
+	utils.PrintErrorAndExit("foo", 5)
+	assert.Equal(t, 5, got)
 }

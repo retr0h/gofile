@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  name = "github.com/Sirupsen/logrus"
+  name = "github.com/caarlos0/spin"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "ac25467273ecdf236d2d83a25c5329d5863d375f"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -24,6 +24,18 @@
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kami-zh/go-capturer"
+  packages = ["."]
+  revision = "e492ea43421da7381e5200a2e22753bfc31347c2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/logrusorgru/aurora"
+  packages = ["."]
+  revision = "d694e6f975a9109e2b063829d563a7c153c4b53c"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -68,18 +80,6 @@
   revision = "9ff6d6c47f3f5de55acc6f464d6e3719b02818ae"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  revision = "5ba7f63082460102a45837dbd1827e10f9479ac0"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/sys"
-  packages = ["unix","windows"]
-  revision = "c11f84a56e43e20a78cee75a7c034031ecf57d1f"
-
-[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -88,6 +88,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "37c39353b2fb373495a25e6d8e9c291eab52e0a9848cf6e5a1926f717aea9f40"
+  inputs-digest = "c80ef341395da5eda41a24e1929ffcfce962e2784532d07be499039b16a224cb"
   solver-name = "gps-cdcl"
   solver-version = 1

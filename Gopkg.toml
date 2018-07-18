@@ -8,10 +8,16 @@
   name = "github.com/xeipuuv/gojsonschema"
 
 [[constraint]]
-  name = "github.com/Sirupsen/logrus"
-
-[[constraint]]
   name = "github.com/stretchr/testify"
 
 [[constraint]]
   name = "github.com/ghodss/yaml"
+
+[[constraint]]
+  name = "github.com/logrusorgru/aurora"
+
+[[constraint]]
+  name = "github.com/kami-zh/go-capturer"
+
+[[constraint]]
+  name = "github.com/caarlos0/spin"

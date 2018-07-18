@@ -18,19 +18,23 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-// Package pkg TODO
+// Package pkg responsible for downloading go packages from a manifest named
+// gofile.yml.
 package pkg
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
+	"strings"
+	"time"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/caarlos0/spin"
 	"github.com/ghodss/yaml"
+	"github.com/logrusorgru/aurora"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -65,6 +69,7 @@ type Package struct {
 // via the `--filename` flag.
 type Packages struct {
 	Packages []Package
+	Debug    bool // Debug option set from CLI with debug state.
 }
 
 // UnmarshalYAML decodes the first YAML document found within the data byte
@@ -105,22 +110,24 @@ func (p *Packages) UnmarshalYAMLFile(filename string) error {
 func (p *Packages) validate(data []byte) error {
 	schemaLoader := gojsonschema.NewStringLoader(pkgSchema)
 	documentLoader := gojsonschema.NewBytesLoader(data)
+
 	// Validate the document against the schema.
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
-
 	if err != nil {
-		// Happens when schema has errors
-		fmt.Println(err)
 		return err
 	}
 
-	// Log schema validation failures.
+	// Build schema validation failures.
 	if !result.Valid() {
+		var errstrings []string
 		for _, desc := range result.Errors() {
-			log.Error(fmt.Sprintf("The document is not valid - %s.", desc))
+			err := fmt.Errorf("%s", desc)
+			errstrings = append(errstrings, err.Error())
 		}
-		return errors.New("Invalid YAML provided")
+
+		return errors.New(strings.Join(errstrings, "\n"))
 	}
+
 	return nil
 }
 
@@ -128,15 +135,43 @@ func (p *Packages) validate(data []byte) error {
 // the resulting package.
 func (p *Packages) Install() error {
 	for _, pkg := range p.Packages {
-		var stderr bytes.Buffer
-		cmd := exec.Command("go", "get", pkg.URL)
-		cmd.Stderr = &stderr
+		if !p.Debug {
+			s := spin.New("%s ")
+			s.Set(spin.Spin8)
+			s.Start()
+			defer s.Stop()
+			// Allow the spinner to show when the install returns too quickly.
+			time.Sleep(5 * time.Millisecond)
+		}
+		fmt.Printf("Installing: %s\n", aurora.Cyan(pkg.URL))
 
-		if err := cmd.Run(); err != nil {
-			log.Error(stderr.String())
-
+		goCmdArgs := []string{"get"}
+		if p.Debug {
+			goCmdArgs = append(goCmdArgs, "-v")
+		}
+		goCmdArgs = append(goCmdArgs, pkg.URL)
+		if err := p.RunCmd("go", goCmdArgs...); err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+// RunCmd execute the provided command with args.
+func (p *Packages) RunCmd(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	if p.Debug {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		commands := strings.Join(cmd.Args, " ")
+		msg := fmt.Sprintf("COMMAND: %s", aurora.Colorize(commands, aurora.BlackFg|aurora.RedBg))
+		fmt.Println(msg)
+	}
+
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
 	return nil
 }

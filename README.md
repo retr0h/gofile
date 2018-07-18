@@ -9,7 +9,7 @@ Ability to install system wide go packages.
 A [similar project](https://github.com/Homebrew/homebrew-bundle) exists
 for [Homebrew](https://brew.sh/).
 
-## Critics
+## Por qué
 
 Could time have been put to better use, by submitting these projects
 into Homebrew?
@@ -41,7 +41,9 @@ Install go packages specified in the default gofile.yml.
 
 Install go packages from an alternate gofile.
 
-    $ gofile --filename path/to/alternate.yml install
+    $ gofile install --filename path/to/alternate.yml
+
+[![asciicast](https://asciinema.org/a/192665.png)](https://asciinema.org/a/192665?speed=2&autoplay=1&loop=1)
 
 ## Dependencies
 
