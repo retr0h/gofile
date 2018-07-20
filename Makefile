@@ -1,5 +1,5 @@
 VENDOR := vendor
-PKGS := $(shell go list ./... | /usr/bin/grep -v /$(VENDOR)/)
+PKGS := $(shell go list ./... | grep -v /$(VENDOR)/)
 PKGS_DELIM := $(shell echo $(PKGS) | sed -e 's/ /,/g')
 GITCOMMIT ?= $(shell git rev-parse --short HEAD)
 GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)

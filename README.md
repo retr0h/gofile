@@ -1,3 +1,5 @@
+[![Build Status](http://img.shields.io/travis/retr0h/gofile.svg?style=flat-square)](https://travis-ci.org/retr0h/gofile)
+
 # gofile
 
 A simple utility to install go packages from a gofile (gofile.yml).
