@@ -26,22 +26,36 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 var p Packages
 
-func TestValidateWithoutRootArrayReturnsErrorAndLogsValidationError(t *testing.T) {
+func TestValidateSchemaHasErrorReturnsError(t *testing.T) {
+	originalJSONSchemaValidator := jsonSchemaValidator
+	jsonSchemaValidator = func(gojsonschema.JSONLoader, gojsonschema.JSONLoader) (*gojsonschema.Result, error) {
+		return nil, errors.New("Failed to load schema")
+	}
+	defer func() { jsonSchemaValidator = originalJSONSchemaValidator }()
+
+	err := p.validate([]byte(""))
+	assert.Equal(t, "Failed to load schema", err.Error())
+}
+
+func TestValidateWithoutRootArrayReturnsError(t *testing.T) {
 	var data = `
 ---
 foo:
 `
 	jsonData, _ := yaml.YAMLToJSON([]byte(data))
 	err := p.validate([]byte(jsonData))
+	assert.Error(t, err)
+
 	expectedError := errors.New("(root): Invalid type. Expected: array, given: object")
 	assert.Equal(t, expectedError, err)
 }
 
-func TestValidateWithoutStringReturnsErrorAndLogsValidationError(t *testing.T) {
+func TestValidateWithoutStringReturnsError(t *testing.T) {
 	var data = `
 ---
 - url:
@@ -56,6 +70,19 @@ func TestValidateWithoutStringReturnsErrorAndLogsValidationError(t *testing.T) {
 	for _, msg := range messages {
 		assert.Contains(t, err.Error(), msg)
 	}
+}
+
+func TestValidateWithoutURLKeyReturnsError(t *testing.T) {
+	var data = `
+---
+- foo: github.com/simeji/jid/cmd/jid
+`
+	jsonData, _ := yaml.YAMLToJSON([]byte(data))
+	err := p.validate([]byte(jsonData))
+	assert.Error(t, err)
+
+	expectedError := errors.New("url: url is required")
+	assert.Equal(t, expectedError, err)
 }
 
 func TestValidate(t *testing.T) {

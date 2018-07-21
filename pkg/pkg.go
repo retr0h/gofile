@@ -59,6 +59,10 @@ const pkgSchema = `
 }
 `
 
+var (
+	jsonSchemaValidator = gojsonschema.Validate
+)
+
 // Package containing the go package details.  All fields are required unless
 // otherwise specified.
 type Package struct {
@@ -112,7 +116,7 @@ func (p *Packages) validate(data []byte) error {
 	documentLoader := gojsonschema.NewBytesLoader(data)
 
 	// Validate the document against the schema.
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	result, err := jsonSchemaValidator(schemaLoader, documentLoader)
 	if err != nil {
 		return err
 	}

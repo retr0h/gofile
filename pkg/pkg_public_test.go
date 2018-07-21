@@ -59,9 +59,8 @@ func TestUnmarshalYAML(t *testing.T) {
 - url: github.com/simeji/jid/cmd/jid
 `
 	err := p.UnmarshalYAML([]byte(data))
-	if assert.NoError(t, err) {
-		assert.Equal(t, "github.com/simeji/jid/cmd/jid", p.Packages[0].URL)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "github.com/simeji/jid/cmd/jid", p.Packages[0].URL)
 }
 
 func TestUnmarshalYAMLFileReturnsErrorWithMissingFile(t *testing.T) {
