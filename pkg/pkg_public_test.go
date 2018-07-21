@@ -22,7 +22,9 @@ package pkg_test
 
 import (
 	"errors"
+	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
 	capturer "github.com/kami-zh/go-capturer"
@@ -79,6 +81,55 @@ func TestUnmarshalYAMLFile(t *testing.T) {
 	assert.NotNil(t, p.Packages[0].URL)
 }
 
+func TestInstall(t *testing.T) {
+	var data = `
+---
+- url: github.com/golang/example/hello
+`
+	p.UnmarshalYAML([]byte(data))
+	err := p.Install()
+	assert.NoError(t, err)
+
+	pkgDir := getGolangExamplePackageDir()
+	assert.DirExists(t, pkgDir)
+
+	defer os.RemoveAll(pkgDir)
+}
+
+func TestInstallDebugAddsVFlag(t *testing.T) {
+	p := pkg.Packages{
+		Debug: true,
+	}
+
+	var data = `
+---
+- url: github.com/golang/example/hello
+`
+	p.UnmarshalYAML([]byte(data))
+	out := capturer.CaptureStdout(func() {
+		err := p.Install()
+		assert.NoError(t, err)
+	})
+
+	msg := "Installing: \x1b[36mgithub.com/golang/example/hello\x1b[0m\nCOMMAND: \x1b[30;41mgo get -v github.com/golang/example/hello\x1b[0m\n"
+	assert.Equal(t, msg, out)
+
+	defer os.RemoveAll(getGolangExamplePackageDir())
+}
+
+func TestInstallReturnsErrorWhenRunCmdErrors(t *testing.T) {
+	p := pkg.Packages{
+		Debug: true,
+	}
+	var data = `
+---
+- url: invalid.
+`
+	p.UnmarshalYAML([]byte(data))
+	err := p.Install()
+	assert.Error(t, err)
+}
+
 func TestRunCommand(t *testing.T) {
 	out := capturer.CaptureStdout(func() {
 		err := p.RunCmd("ls")
@@ -117,4 +168,9 @@ func TestRunCommandPrintsStreamingStderr(t *testing.T) {
 func TestRunCommandReturnsError(t *testing.T) {
 	err := p.RunCmd("false")
 	assert.Error(t, err)
+}
+
+func getGolangExamplePackageDir() string {
+	return filepath.Join(os.Getenv("GOPATH"), "src", "github.com", "golang", "example")
+
 }
