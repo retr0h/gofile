@@ -44,7 +44,7 @@ Install go packages specified in the default gofile.yml.
 
 Install go packages from an alternate gofile.
 
-    $ gofile install --filename path/to/alternate.yml
+    $ gofile install --filename path/to/gofile.yml
 
 [![asciicast](https://asciinema.org/a/192665.png)](https://asciinema.org/a/192665?speed=2&autoplay=1&loop=1)
 
