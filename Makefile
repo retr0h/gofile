@@ -1,12 +1,15 @@
 VENDOR := vendor
 PKGS := $(shell go list ./... | grep -v /$(VENDOR)/)
+$(if $(PKGS), , $(error "go list failed"))
 PKGS_DELIM := $(shell echo $(PKGS) | sed -e 's/ /,/g')
 GITCOMMIT ?= $(shell git rev-parse --short HEAD)
+$(if $(GITCOMMIT), , $(error "git rev-parse failed"))
 GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)
 ifneq ($(GITUNTRACKEDCHANGES),)
 GITCOMMIT := $(GITCOMMIT)-dirty
 endif
 VERSION ?= $(shell git describe --tags --always)
+$(if $(VERSION), , $(error "git describe failed"))
 BUILDDATE := $(shell date '+%Y/%m/%d %H:%M:%S')
 LDFLAGS := -s \
 		-w \
