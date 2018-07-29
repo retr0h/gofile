@@ -35,138 +35,144 @@ import (
 var p pkg.Packages
 
 func TestUnmarshalYAMLDoesNotParseYAMLAndReturnsError(t *testing.T) {
-	var data = `
+	data := `
 ---
 %foo:
 `
 	err := p.UnmarshalYAML([]byte(data))
-	msg := "yaml: line 3: found unexpected non-alphabetical character"
-	assert.Equal(t, err.Error(), msg)
+	want := "yaml: line 3: found unexpected non-alphabetical character"
+
+	assert.Equal(t, want, err.Error())
 	assert.Error(t, err)
 }
 
 func TestUnmarshalYAMLDoesNotValidateYAMLAndReturnsError(t *testing.T) {
-	var data = `
+	data := `
 ---
 foo: bar
 `
 	err := p.UnmarshalYAML([]byte(data))
-	expectedError := errors.New("(root): Invalid type. Expected: array, given: object")
-	assert.Equal(t, expectedError, err)
+	want := errors.New("(root): Invalid type. Expected: array, given: object")
+
+	assert.Equal(t, want, err)
 }
 
 func TestUnmarshalYAML(t *testing.T) {
-	var data = `
+	data := `
 ---
 - url: github.com/simeji/jid/cmd/jid
 `
 	err := p.UnmarshalYAML([]byte(data))
+	want := "github.com/simeji/jid/cmd/jid"
+
 	assert.NoError(t, err)
-	assert.Equal(t, "github.com/simeji/jid/cmd/jid", p.Packages[0].URL)
+	assert.Equal(t, want, p.Packages[0].URL)
 }
 
 func TestUnmarshalYAMLFileReturnsErrorWithMissingFile(t *testing.T) {
-	var filename = "missing.yml"
+	filename := "missing.yml"
 
 	err := p.UnmarshalYAMLFile(filename)
-	msg := "open missing.yml: no such file or directory"
-	assert.Equal(t, err.Error(), msg)
+	want := "open missing.yml: no such file or directory"
+
+	assert.Equal(t, want, err.Error())
 	assert.Error(t, err)
 }
 
 func TestUnmarshalYAMLFile(t *testing.T) {
-	var filename = path.Join("..", "test", "gofile.yml")
-
+	filename := path.Join("..", "test", "gofile.yml")
 	p.UnmarshalYAMLFile(filename)
+
 	assert.NotNil(t, p.Packages[0].URL)
 }
 
 func TestInstall(t *testing.T) {
-	var data = `
+	data := `
 ---
 - url: github.com/golang/example/hello
 `
+	pkgDir := getGolangExamplePackageDir()
 	p.UnmarshalYAML([]byte(data))
 	err := p.Install()
-	assert.NoError(t, err)
 
-	pkgDir := getGolangExamplePackageDir()
+	assert.NoError(t, err)
 	assert.DirExists(t, pkgDir)
 
 	defer os.RemoveAll(pkgDir)
 }
 
 func TestInstallDebugAddsVFlag(t *testing.T) {
-	p := pkg.Packages{
-		Debug: true,
-	}
-
-	var data = `
+	data := `
 ---
 - url: github.com/golang/example/hello
 `
+	p := pkg.Packages{
+		Debug: true,
+	}
 	p.UnmarshalYAML([]byte(data))
-	out := capturer.CaptureStdout(func() {
+	got := capturer.CaptureStdout(func() {
 		err := p.Install()
 		assert.NoError(t, err)
 	})
+	want := "Installing: \x1b[36mgithub.com/golang/example/hello\x1b[0m\nCOMMAND: \x1b[30;41mgo get -v github.com/golang/example/hello\x1b[0m\n"
 
-	msg := "Installing: \x1b[36mgithub.com/golang/example/hello\x1b[0m\nCOMMAND: \x1b[30;41mgo get -v github.com/golang/example/hello\x1b[0m\n"
-	assert.Equal(t, msg, out)
+	assert.Equal(t, want, got)
 
 	defer os.RemoveAll(getGolangExamplePackageDir())
 }
 
 func TestInstallReturnsErrorWhenRunCmdErrors(t *testing.T) {
-	p := pkg.Packages{
-		Debug: true,
-	}
-	var data = `
+	data := `
 ---
 - url: invalid.
 `
+	p := pkg.Packages{
+		Debug: true,
+	}
 	p.UnmarshalYAML([]byte(data))
+
 	err := p.Install()
 	assert.Error(t, err)
 }
 
 func TestRunCommand(t *testing.T) {
-	out := capturer.CaptureStdout(func() {
+	got := capturer.CaptureStdout(func() {
 		err := p.RunCmd("ls")
 		assert.NoError(t, err)
 	})
 
-	assert.Empty(t, out)
+	assert.Empty(t, got)
 }
 
 func TestRunCommandPrintsStreamingStdout(t *testing.T) {
 	p := pkg.Packages{
 		Debug: true,
 	}
-
-	out := capturer.CaptureStdout(func() {
+	got := capturer.CaptureStdout(func() {
 		err := p.RunCmd("echo", "-n", "foo")
 		assert.NoError(t, err)
 	})
+	want := "COMMAND: \x1b[30;41mecho -n foo\x1b[0m\nfoo"
 
-	assert.Equal(t, "COMMAND: \x1b[30;41mecho -n foo\x1b[0m\nfoo", out)
+	assert.Equal(t, want, got)
 }
 
 func TestRunCommandPrintsStreamingStderr(t *testing.T) {
 	p := pkg.Packages{
 		Debug: true,
 	}
-
-	out := capturer.CaptureStderr(func() {
+	got := capturer.CaptureStderr(func() {
 		err := p.RunCmd("cat", "foo")
 		assert.Error(t, err)
 	})
+	want := "cat: foo: No such file or directory\n"
 
-	assert.Equal(t, "cat: foo: No such file or directory\n", out)
+	assert.Equal(t, want, got)
 }
 
 func TestRunCommandReturnsError(t *testing.T) {
 	err := p.RunCmd("false")
+
 	assert.Error(t, err)
 }
 

@@ -29,11 +29,12 @@ import (
 )
 
 func TestPrintError(t *testing.T) {
-	out := capturer.CaptureStderr(func() {
+	got := capturer.CaptureStderr(func() {
 		utils.PrintError("foo")
 	})
+	want := "\x1b[31mERROR\x1b[0m: foo\n"
 
-	assert.Equal(t, "\x1b[31mERROR\x1b[0m: foo\n", out)
+	assert.Equal(t, want, got)
 }
 
 func TestPrintErrorAndExit(t *testing.T) {

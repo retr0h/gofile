@@ -39,58 +39,62 @@ func TestValidateSchemaHasErrorReturnsError(t *testing.T) {
 	defer func() { jsonSchemaValidator = originalJSONSchemaValidator }()
 
 	err := p.validate([]byte(""))
-	assert.Equal(t, "Failed to load schema", err.Error())
+	want := "Failed to load schema"
+
+	assert.Equal(t, want, err.Error())
 }
 
 func TestValidateWithoutRootArrayReturnsError(t *testing.T) {
-	var data = `
+	data := `
 ---
 foo:
 `
 	jsonData, _ := yaml.YAMLToJSON([]byte(data))
 	err := p.validate([]byte(jsonData))
-	assert.Error(t, err)
+	want := errors.New("(root): Invalid type. Expected: array, given: object")
 
-	expectedError := errors.New("(root): Invalid type. Expected: array, given: object")
-	assert.Equal(t, expectedError, err)
+	assert.Error(t, err)
+	assert.Equal(t, want, err)
 }
 
 func TestValidateWithoutStringReturnsError(t *testing.T) {
-	var data = `
+	data := `
 ---
 - url:
 `
 	jsonData, _ := yaml.YAMLToJSON([]byte(data))
 	err := p.validate([]byte(jsonData))
+
 	assert.Error(t, err)
 
 	messages := []string{
 		"0.url: Invalid type. Expected: string, given: null",
 	}
-	for _, msg := range messages {
-		assert.Contains(t, err.Error(), msg)
+	for _, want := range messages {
+		assert.Contains(t, err.Error(), want)
 	}
 }
 
 func TestValidateWithoutURLKeyReturnsError(t *testing.T) {
-	var data = `
+	data := `
 ---
 - foo: github.com/simeji/jid/cmd/jid
 `
 	jsonData, _ := yaml.YAMLToJSON([]byte(data))
 	err := p.validate([]byte(jsonData))
-	assert.Error(t, err)
+	want := errors.New("url: url is required")
 
-	expectedError := errors.New("url: url is required")
-	assert.Equal(t, expectedError, err)
+	assert.Error(t, err)
+	assert.Equal(t, want, err)
 }
 
 func TestValidate(t *testing.T) {
-	var data = `
+	data := `
 ---
 - url: https://example.com/user/repo.git
 `
 	jsonData, _ := yaml.YAMLToJSON([]byte(data))
 	err := p.validate([]byte(jsonData))
+
 	assert.NoError(t, err)
 }
