@@ -1,5 +1,6 @@
 [![Build Status](http://img.shields.io/travis/retr0h/gofile.svg?style=flat-square)](https://travis-ci.org/retr0h/gofile)
 [![Coveralls github](https://img.shields.io/coveralls/github/retr0h/gofile.svg?style=flat-square)](https://coveralls.io/github/retr0h/gofile)
+[![Go Report Card](https://goreportcard.com/badge/github.com/retr0h/gofile?style=flat-square)](https://goreportcard.com/report/github.com/retr0h/gofile)
 
 # gofile
 
