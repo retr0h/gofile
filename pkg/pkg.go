@@ -69,7 +69,7 @@ type Package struct {
 	URL string `yaml:"url"`
 }
 
-// Packages contains a list of `Package` structs initalized by the cli
+// Packages contains a list of `Package` structs initialized by the cli
 // via the `--filename` flag.
 type Packages struct {
 	Packages []Package
