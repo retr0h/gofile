@@ -4,7 +4,7 @@
 
 # gofile
 
-A simple utility to install go packages from a gofile (gofile.yml).
+A simple utility to install go packages from a gofile (`gofile.yml`).
 
 ## Motivation
 
@@ -26,41 +26,54 @@ Could this have been a shell script?
 
 ## Installation
 
-    $  go get github.com/retr0h/gofile
+```bash
+$  go get github.com/retr0h/gofile
+```
 
 ## Usage
 
-Create the gofile.
+Create the gofile (`gofile.yml`).
 
-    $ cat gofile.yml
-    ---
-    - url: github.com/simeji/jid/cmd/jid
-    - url: golang.org/x/lint/golint
-    - url: golang.org/x/tools/cmd/goimports
-    - url: github.com/arsham/figurine
+```yaml
+---
+- url: github.com/simeji/jid/cmd/jid
+- url: golang.org/x/lint/golint
+- url: golang.org/x/tools/cmd/goimports
+- url: github.com/arsham/figurine
+```
 
 Install go packages specified in the default gofile.yml.
 
-    $ gofile install
+```bash
+$ gofile install
+```
 
 Install go packages from an alternate gofile.
 
-    $ gofile install --filename path/to/gofile.yml
+```bash
+$ gofile install --filename path/to/gofile.yml
+```
 
 [![asciicast](https://asciinema.org/a/192665.png)](https://asciinema.org/a/192665?speed=2&autoplay=1&loop=1)
 
 ## Dependencies
 
-    $ go get github.com/golang/dep/cmd/dep
+```bash
+$ go get github.com/golang/dep/cmd/dep
+```
 
 ## Building
 
-    $ make build
-    $ tree .build/
+```bash
+$ make build
+$ tree .build/
+```
 
 ## Testing
 
-    $ make test
+```bash
+$ make test
+```
 
 ## License
 
