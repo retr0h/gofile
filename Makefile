@@ -24,12 +24,12 @@ test: fmt lint vet
 
 cover:
 	@echo "+ $@"
-	$(shell [ -e cover.out ] && rm cover.out)
-	@go list -f '{{if or (len .TestGoFiles) (len .XTestGoFiles)}}go test -test.v -test.timeout=120s -covermode=count -coverprofile={{.Name}}_{{len .Imports}}_{{len .Deps}}.coverprofile -coverpkg $(PKGS_DELIM) {{.ImportPath}}{{end}}' $(PKGS) | xargs -I {} bash -c {}
-	@echo "mode: count" > cover.out
-	@grep -h -v "^mode:" *.coverprofile >> "cover.out"
-	@rm *.coverprofile
-	@go tool cover -html=cover.out -o=cover.html
+	$(shell [ -e coverage.out ] && rm coverage.out)
+	@echo "mode: count" > coverage-all.out
+	$(foreach pkg,$(PKGS),\
+		go test -coverprofile=coverage.out -covermode=count $(pkg);\
+		tail -n +2 coverage.out >> coverage-all.out;)
+	@go tool cover -html=coverage-all.out -o=coverage-all.html
 
 fmt:
 	@echo "+ $@"

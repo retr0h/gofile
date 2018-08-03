@@ -10,4 +10,5 @@ install:
   - go get github.com/mattn/goveralls
 script:
   - make test
-  - ${GOPATH}/bin/goveralls -service=travis-ci
+  - make cover
+  - ${GOPATH}/bin/goveralls -coverprofile=coverage-all.out -service=travis-ci
